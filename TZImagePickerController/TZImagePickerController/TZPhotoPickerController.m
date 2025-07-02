@@ -48,7 +48,8 @@
 @property (nonatomic, strong) NSOperationQueue *operationQueue;
 @property (nonatomic, assign) BOOL isSavingMedia;
 @property (nonatomic, assign) BOOL isFetchingMedia;
-
+#pragma mark - album_add_delegate使用新增
+@property (nonatomic, assign) BOOL isTakePhoto;
 @end
 
 static CGSize AssetGridThumbnailSize;
@@ -462,6 +463,8 @@ static CGFloat itemMargin = 5;
     [self.navigationController popViewControllerAnimated:YES];
 }
 - (void)previewButtonClick {
+    self.isTakePhoto = NO;
+    
     TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
     [self pushPhotoPrevireViewController:photoPreviewVc needCheckSelectedModels:YES];
 }
@@ -589,6 +592,19 @@ static CGFloat itemMargin = 5;
     if (tzImagePickerVc.didFinishPickingPhotosWithInfosHandle) {
         tzImagePickerVc.didFinishPickingPhotosWithInfosHandle(photos,assets,_isSelectOriginalPhoto,infoArr);
     }
+}
+
+#pragma mark - album_add_delegate使用新增
+// 相机使用曝光
+- (void)callDelegateMethodWithCameraShow {
+    TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    [tzImagePickerVc.pickerDelegate imagePickerControllerWithCameraShow];
+}
+
+// 相机使用照片
+- (void)callDelegateMethodWithCameraTake {
+    TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    [tzImagePickerVc.pickerDelegate imagePickerControllerWithCameraTake];
 }
 
 #pragma mark - UICollectionViewDataSource && Delegate
@@ -750,6 +766,8 @@ static CGFloat itemMargin = 5;
             [self.navigationController pushViewController:gifPreviewVc animated:YES];
         }
     } else {
+        self.isTakePhoto = NO;
+        
         TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
         photoPreviewVc.currentIndex = index;
         photoPreviewVc.models = _models;
@@ -878,6 +896,9 @@ static CGFloat itemMargin = 5;
             tzImagePickerVc.uiImagePickerControllerSettingBlock(_imagePickerVc);
         }
         [self presentViewController:_imagePickerVc animated:YES completion:nil];
+        
+        // 相机使用曝光
+        [self callDelegateMethodWithCameraShow];
     } else {
         NSLog(@"模拟器中无法打开照相机,请在真机中使用");
     }
@@ -935,6 +956,10 @@ static CGFloat itemMargin = 5;
             photos = @[cropedImage];
         }
         [strongSelf didGetAllPhotos:photos assets:assets infoArr:nil];
+        
+        if (strongSelf.isTakePhoto) {
+            [strongSelf callDelegateMethodWithCameraTake];
+        }
     }];
     [self.navigationController pushViewController:photoPreviewVc animated:YES];
 }
@@ -1076,6 +1101,8 @@ static CGFloat itemMargin = 5;
     
     if (tzImagePickerVc.maxImagesCount <= 1) {
         if (tzImagePickerVc.allowCrop && asset.mediaType == PHAssetMediaTypeImage) {
+            self.isTakePhoto = YES;
+            
             TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
             if (tzImagePickerVc.sortAscendingByModificationDate) {
                 photoPreviewVc.currentIndex = _models.count - 1;

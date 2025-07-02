@@ -348,6 +348,14 @@
 // Decide asset can be selected
 // 决定照片能否被选中
 - (BOOL)isAssetCanBeSelected:(PHAsset *)asset;
+
+#pragma mark - album_add_delegate使用新增
+// 相机使用曝光
+- (void)imagePickerControllerWithCameraShow;
+
+// 相机使用照片
+- (void)imagePickerControllerWithCameraTake;
+
 @end
 
 
