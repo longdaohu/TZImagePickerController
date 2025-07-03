@@ -739,6 +739,11 @@
     if ([self.pickerDelegate respondsToSelector:@selector(tz_imagePickerControllerDidCancel:)]) {
         [self.pickerDelegate tz_imagePickerControllerDidCancel:self];
     }
+    
+    if  ([self.pickerDelegate respondsToSelector:@selector(imagePickerControllerDidCancel:)]) {
+        [self.pickerDelegate imagePickerControllerDidCancel:self.isTakePhoto];
+    }
+    
     if (self.imagePickerControllerDidCancelHandle) {
         self.imagePickerControllerDidCancelHandle();
     }

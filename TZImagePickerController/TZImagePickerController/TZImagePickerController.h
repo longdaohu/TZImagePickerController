@@ -285,6 +285,9 @@
 
 @property (nonatomic, weak) id<TZImagePickerControllerDelegate> pickerDelegate;
 
+#pragma mark - album_add_delegate使用新增
+@property (nonatomic, assign) BOOL isTakePhoto;
+
 @end
 
 
@@ -354,7 +357,10 @@
 - (void)imagePickerControllerWithCameraShow;
 
 // 相机使用照片
-- (void)imagePickerControllerWithCameraTake;
+- (void)imagePickerControllerWithCameraTake: (BOOL)isTakePhoto;
+
+// 取消不使用照片
+- (void)imagePickerControllerDidCancel: (BOOL)isTakePhoto;
 
 @end
 

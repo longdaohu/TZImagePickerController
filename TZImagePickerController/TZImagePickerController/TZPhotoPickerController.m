@@ -48,8 +48,7 @@
 @property (nonatomic, strong) NSOperationQueue *operationQueue;
 @property (nonatomic, assign) BOOL isSavingMedia;
 @property (nonatomic, assign) BOOL isFetchingMedia;
-#pragma mark - album_add_delegate使用新增
-@property (nonatomic, assign) BOOL isTakePhoto;
+
 @end
 
 static CGSize AssetGridThumbnailSize;
@@ -463,7 +462,8 @@ static CGFloat itemMargin = 5;
     [self.navigationController popViewControllerAnimated:YES];
 }
 - (void)previewButtonClick {
-    self.isTakePhoto = NO;
+    TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    tzImagePickerVc.isTakePhoto = NO;
     
     TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
     [self pushPhotoPrevireViewController:photoPreviewVc needCheckSelectedModels:YES];
@@ -604,7 +604,7 @@ static CGFloat itemMargin = 5;
 // 相机使用照片
 - (void)callDelegateMethodWithCameraTake {
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
-    [tzImagePickerVc.pickerDelegate imagePickerControllerWithCameraTake];
+    [tzImagePickerVc.pickerDelegate imagePickerControllerWithCameraTake: tzImagePickerVc.isTakePhoto];
 }
 
 #pragma mark - UICollectionViewDataSource && Delegate
@@ -766,7 +766,7 @@ static CGFloat itemMargin = 5;
             [self.navigationController pushViewController:gifPreviewVc animated:YES];
         }
     } else {
-        self.isTakePhoto = NO;
+        tzImagePickerVc.isTakePhoto = NO;
         
         TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
         photoPreviewVc.currentIndex = index;
@@ -956,10 +956,9 @@ static CGFloat itemMargin = 5;
             photos = @[cropedImage];
         }
         [strongSelf didGetAllPhotos:photos assets:assets infoArr:nil];
+       
+        [strongSelf callDelegateMethodWithCameraTake];
         
-        if (strongSelf.isTakePhoto) {
-            [strongSelf callDelegateMethodWithCameraTake];
-        }
     }];
     [self.navigationController pushViewController:photoPreviewVc animated:YES];
 }
@@ -1101,7 +1100,7 @@ static CGFloat itemMargin = 5;
     
     if (tzImagePickerVc.maxImagesCount <= 1) {
         if (tzImagePickerVc.allowCrop && asset.mediaType == PHAssetMediaTypeImage) {
-            self.isTakePhoto = YES;
+            tzImagePickerVc.isTakePhoto = YES;
             
             TZPhotoPreviewController *photoPreviewVc = [[TZPhotoPreviewController alloc] init];
             if (tzImagePickerVc.sortAscendingByModificationDate) {
