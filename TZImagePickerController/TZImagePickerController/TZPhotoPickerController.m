@@ -1137,6 +1137,9 @@ static CGFloat itemMargin = 5;
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+    tzImagePickerVc.isTakePhoto = YES;
+    
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
