@@ -127,6 +127,15 @@
     [_naviBar addSubview:_indexLabel];
     [_naviBar addSubview:_backButton];
     [self.view addSubview:_naviBar];
+    
+    // album_add_delegate
+    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _doneButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    [_doneButton setTitle: @"Upload" forState:UIControlStateNormal];
+    [_doneButton setTitleColor: [UIColor colorWithRed:0 green:190.0/255.0 blue:206.0/255.0 alpha:1] forState:UIControlStateNormal];
+    
+    [_naviBar addSubview:_doneButton];
 }
 
 - (void)configBottomToolBar {
@@ -155,12 +164,12 @@
         _originalPhotoLabel.backgroundColor = [UIColor clearColor];
         if (_isSelectOriginalPhoto) [self showPhotoBytes];
     }
-    
-    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    _doneButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
-    [_doneButton setTitle:_tzImagePickerVc.doneBtnTitleStr forState:UIControlStateNormal];
-    [_doneButton setTitleColor:_tzImagePickerVc.oKButtonTitleColorNormal forState:UIControlStateNormal];
+    // album_add_delegate
+//    _doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    _doneButton.titleLabel.font = [UIFont systemFontOfSize:16];
+//    [_doneButton addTarget:self action:@selector(doneButtonClick) forControlEvents:UIControlEventTouchUpInside];
+//    [_doneButton setTitle:_tzImagePickerVc.doneBtnTitleStr forState:UIControlStateNormal];
+//    [_doneButton setTitleColor:_tzImagePickerVc.oKButtonTitleColorNormal forState:UIControlStateNormal];
     
     _numberImageView = [[UIImageView alloc] initWithImage:_tzImagePickerVc.photoNumberIconImage];
     _numberImageView.backgroundColor = [UIColor clearColor];
@@ -182,7 +191,7 @@
     [_numberLabel addGestureRecognizer:tapGesture];
     
     [_originalPhotoButton addSubview:_originalPhotoLabel];
-    [_toolBar addSubview:_doneButton];
+//    [_toolBar addSubview:_doneButton];
     [_toolBar addSubview:_originalPhotoButton];
     [_toolBar addSubview:_numberImageView];
     [_toolBar addSubview:_numberLabel];
@@ -237,8 +246,10 @@
         _cropView.userInteractionEnabled = NO;
         _cropView.frame = _tzImagePickerVc.cropRect;
         _cropView.backgroundColor = [UIColor clearColor];
-        _cropView.layer.borderColor = [UIColor whiteColor].CGColor;
-        _cropView.layer.borderWidth = 1.0;
+        // album_add_delegate
+        [self addCornerIndicatorsToView:_cropView];
+//        _cropView.layer.borderColor = [UIColor whiteColor].CGColor;
+//        _cropView.layer.borderWidth = 1.0;
         if (_tzImagePickerVc.needCircleCrop) {
             _cropView.layer.cornerRadius = _tzImagePickerVc.cropRect.size.width / 2;
             _cropView.clipsToBounds = YES;
@@ -250,6 +261,37 @@
         
         [self.view bringSubviewToFront:_naviBar];
         [self.view bringSubviewToFront:_toolBar];
+    }
+}
+
+// album_add_delegate
+- (void)addCornerIndicatorsToView:(UIView *)view {
+    CGFloat lineLength = 26.0;
+    CGFloat lineWidth = 2.0;
+    UIColor *lineColor = [UIColor whiteColor];
+    
+    NSArray *corners = @[@"topLeft", @"topRight", @"bottomLeft", @"bottomRight"];
+    for (NSString *corner in corners) {
+        UIView *horizontal = [[UIView alloc] init];
+        UIView *vertical = [[UIView alloc] init];
+        horizontal.backgroundColor = lineColor;
+        vertical.backgroundColor = lineColor;
+        [view addSubview:horizontal];
+        [view addSubview:vertical];
+
+        if ([corner isEqualToString:@"topLeft"]) {
+            horizontal.frame = CGRectMake(0, 0, lineLength, lineWidth);
+            vertical.frame = CGRectMake(0, 0, lineWidth, lineLength);
+        } else if ([corner isEqualToString:@"topRight"]) {
+            horizontal.frame = CGRectMake(view.bounds.size.width - lineLength, 0, lineLength, lineWidth);
+            vertical.frame = CGRectMake(view.bounds.size.width - lineWidth, 0, lineWidth, lineLength);
+        } else if ([corner isEqualToString:@"bottomLeft"]) {
+            horizontal.frame = CGRectMake(0, view.bounds.size.height - lineWidth, lineLength, lineWidth);
+            vertical.frame = CGRectMake(0, view.bounds.size.height - lineLength, lineWidth, lineLength);
+        } else if ([corner isEqualToString:@"bottomRight"]) {
+            horizontal.frame = CGRectMake(view.bounds.size.width - lineLength, view.bounds.size.height - lineWidth, lineLength, lineWidth);
+            vertical.frame = CGRectMake(view.bounds.size.width - lineWidth, view.bounds.size.height - lineLength, lineWidth, lineLength);
+        }
     }
 }
 
@@ -306,11 +348,12 @@
     }
     
     [_doneButton sizeToFit];
+    // album_add_delegate
     if (isRTL) {
-        _doneButton.frame = CGRectMake(12, 0, MAX(44, _doneButton.tz_width), 44);
+        _doneButton.frame = CGRectMake(12, 10 + statusBarHeightInterval, MAX(44, _doneButton.tz_width), 44);
         _numberImageView.frame = CGRectMake(_doneButton.tz_right + 5, 10, 24, 24);
     } else {
-        _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 12, 0, MAX(44, _doneButton.tz_width), 44);
+        _doneButton.frame = CGRectMake(self.view.tz_width - _doneButton.tz_width - 12, 10 + statusBarHeightInterval, MAX(44, _doneButton.tz_width), 44);
         _numberImageView.frame = CGRectMake(_doneButton.tz_left - 24 - 5, 10, 24, 24);
     }
     _numberLabel.frame = _numberImageView.frame;
