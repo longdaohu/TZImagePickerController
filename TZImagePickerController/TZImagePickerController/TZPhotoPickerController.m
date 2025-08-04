@@ -113,6 +113,8 @@ static CGFloat itemMargin = 5;
     // [self resetCachedAssets];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusBarOrientationNotification:) name:UIApplicationDidChangeStatusBarOrientationNotification object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCustomCameraPhoto:) name:@"CustomCameraDidTakePhoto" object:nil];
+    
     self.operationQueue = [[NSOperationQueue alloc] init];
     self.operationQueue.maxConcurrentOperationCount = 3;
 }
@@ -455,6 +457,26 @@ static CGFloat itemMargin = 5;
 
 - (void)didChangeStatusBarOrientationNotification:(NSNotification *)noti {
     _offsetItemCount = _collectionView.contentOffset.y / (_layout.itemSize.height + _layout.minimumLineSpacing);
+}
+
+- (void)handleCustomCameraPhoto:(NSNotification *)noti {
+    // 从通知对象中获取UIImage
+    UIImage *image = (UIImage *)noti.object;
+    
+    // 检查图片是否有效
+    if (image) {
+        self.isSavingMedia = YES;
+        [[TZImageManager manager] savePhotoWithImage:image meta:@{} location:self.location completion:^(PHAsset *asset, NSError *error){
+            self.isSavingMedia = NO;
+            if (!error && asset) {
+                [self addPHAsset:asset];
+            } else {
+                TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
+                [tzImagePickerVc hideProgressHUD];
+            }
+        }];
+        self.location = nil;
+    }
 }
 
 #pragma mark - Click Event
@@ -882,20 +904,20 @@ static CGFloat itemMargin = 5;
     
     UIImagePickerControllerSourceType sourceType = UIImagePickerControllerSourceTypeCamera;
     if ([UIImagePickerController isSourceTypeAvailable: sourceType]) {
-        self.imagePickerVc.sourceType = sourceType;
-        NSMutableArray *mediaTypes = [NSMutableArray array];
-        if (tzImagePickerVc.allowTakePicture) {
-            [mediaTypes addObject:(NSString *)kUTTypeImage];
-        }
-        if (tzImagePickerVc.allowTakeVideo) {
-            [mediaTypes addObject:(NSString *)kUTTypeMovie];
-            self.imagePickerVc.videoMaximumDuration = tzImagePickerVc.videoMaximumDuration;
-        }
-        self.imagePickerVc.mediaTypes= mediaTypes;
-        if (tzImagePickerVc.uiImagePickerControllerSettingBlock) {
-            tzImagePickerVc.uiImagePickerControllerSettingBlock(_imagePickerVc);
-        }
-        [self presentViewController:_imagePickerVc animated:YES completion:nil];
+//        self.imagePickerVc.sourceType = sourceType;
+//        NSMutableArray *mediaTypes = [NSMutableArray array];
+//        if (tzImagePickerVc.allowTakePicture) {
+//            [mediaTypes addObject:(NSString *)kUTTypeImage];
+//        }
+//        if (tzImagePickerVc.allowTakeVideo) {
+//            [mediaTypes addObject:(NSString *)kUTTypeMovie];
+//            self.imagePickerVc.videoMaximumDuration = tzImagePickerVc.videoMaximumDuration;
+//        }
+//        self.imagePickerVc.mediaTypes= mediaTypes;
+//        if (tzImagePickerVc.uiImagePickerControllerSettingBlock) {
+//            tzImagePickerVc.uiImagePickerControllerSettingBlock(_imagePickerVc);
+//        }
+//        [self presentViewController:_imagePickerVc animated:YES completion:nil];
         
         // 相机使用曝光
         [self callDelegateMethodWithCameraShow];
